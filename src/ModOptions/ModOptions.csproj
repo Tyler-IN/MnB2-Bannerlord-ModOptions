@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
+        <MSBuildWarningsAsMessages>MSB3106;MSB3277</MSBuildWarningsAsMessages>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x64</Platforms>
+        <RootNamespace />
+        <Version>0.0.2</Version>
+        <Title>Mod Options</Title>
+        <Authors>Tyler Young</Authors>
+        <Company>The Mount &amp; Blade II: Bannerlord Community</Company>
+        <OutDir>../../bin/Win64_Shipping_Client</OutDir>
+        <LangVersion>8</LangVersion>
+        <MnB2BannerlordBinDir>../../../../bin/Win64_Shipping_Client</MnB2BannerlordBinDir>
+        <MnB2BannerlordLauncher>$(MnB2BannerlordBinDir)/TaleWorlds.MountAndBlade.Launcher.exe</MnB2BannerlordLauncher>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Reference Include="..\..\..\..\bin\Win64_Shipping_Client\System.*.dll">
+            <HintPath>%(Identity)</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="..\..\..\..\bin\Win64_Shipping_Client\TaleWorlds.*.dll">
+            <HintPath>%(Identity)</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="..\..\..\..\bin\Win64_Shipping_Client\Steamworks.*.dll">
+            <HintPath>%(Identity)</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="..\..\..\Native\bin\Win64_Shipping_Client\*.dll">
+            <HintPath>%(Identity)</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(PkgLib_Harmony)\lib\net48\0Harmony.dll">
+            <HintPath>%(Identity)</HintPath>
+            <Private>True</Private>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="..\..\SubModule.xml">
+            <Link>SubModule.xml</Link>
+        </None>
+        <None Include="..\..\README.md">
+            <Link>README.md</Link>
+        </None>
+        <None Remove="*.DotSettings" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Lib.Harmony" Version="2.0.0.9" PrivateAssets="All">
+            <GeneratePathProperty>True</GeneratePathProperty>
+            <NoWarn>NU1701</NoWarn>
+        </PackageReference>
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
+        <PackageReference Include="Tomlyn" Version="0.1.2" />
+    </ItemGroup>
+</Project>
