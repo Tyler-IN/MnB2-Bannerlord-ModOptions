@@ -46,7 +46,7 @@ namespace ModOptions {
     private readonly DocumentSyntax _toml;
 
     [PublicAPI]
-    public OptionsFile(string fileName) {
+    protected OptionsFile(string fileName) {
       _path = Path.Combine(Utilities.GetConfigsPath(), fileName);
       if (!File.Exists(_path)) {
         _toml = new DocumentSyntax();
@@ -55,6 +55,36 @@ namespace ModOptions {
 
       var bytes = File.ReadAllBytes(_path);
       _toml = Toml.Parse(bytes, _path);
+    }
+
+    public void Import(string path) {
+      if (!File.Exists(path))
+        throw new FileNotFoundException("Can't import missing file.", path);
+
+      var bytes = File.ReadAllBytes(path);
+      var imported = Toml.Parse(bytes, path);
+      foreach (var kv in imported.KeyValues) {
+        var targetKv = _toml.KeyValues.FirstOrDefault(x => x.Key == kv.Key);
+        if (targetKv == null)
+          _toml.KeyValues.Add(kv);
+        else
+          targetKv.Value = kv.Value;
+      }
+
+      foreach (var t in imported.Tables) {
+        var targetT = _toml.Tables.FirstOrDefault(x => x.Name == t.Name);
+        if (targetT != null)
+          _toml.Tables.Add(t);
+        else {
+          foreach (var kv in t.Items) {
+            var targetKv = _toml.KeyValues.FirstOrDefault(x => x.Key != kv.Key);
+            if (targetKv == null)
+              _toml.KeyValues.Add(kv);
+            else
+              targetKv.Value = kv.Value;
+          }
+        }
+      }
     }
 
     [PublicAPI]

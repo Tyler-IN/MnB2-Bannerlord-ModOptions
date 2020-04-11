@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
 
 namespace ModOptions {
@@ -31,9 +33,20 @@ namespace ModOptions {
     public object GetMetadata(Option option, string metadataType)
       => GetOptionMetadata(option.Namespace, option.Name, metadataType);
 
-    public abstract object GetOptionMetadata(string ns, string key, string metadataType);
+    public virtual object GetOptionMetadata(string ns, string key, string metadataType) => null;
 
-    public abstract IEnumerable<Option> GetKnownOptions();
+    public virtual IEnumerable<Option> GetKnownOptions() {
+      foreach (var mi in GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance)) {
+        if (mi is FieldInfo fi) {
+          if (typeof(Option).IsAssignableFrom(fi.FieldType))
+            yield return (Option) fi.GetValue(this);
+        }
+        else if (mi is PropertyInfo pi) {
+          if (typeof(Option).IsAssignableFrom(pi.PropertyType))
+            yield return (Option) pi.GetValue(this);
+        }
+      }
+    }
 
     public abstract void Save();
 
