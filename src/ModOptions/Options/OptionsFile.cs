@@ -14,7 +14,7 @@ namespace ModOptions {
   public abstract partial class OptionsFile : OptionsStore, IEquatable<OptionsFile>, IComparable<OptionsFile> {
 
     public bool Equals(OptionsFile other)
-      => _path == other._path;
+      => _path == other?._path;
 
     public override bool Equals(OptionsStore other)
       => other is OptionsFile file && Equals(file);
@@ -45,8 +45,13 @@ namespace ModOptions {
 
     private readonly DocumentSyntax _toml;
 
+    private readonly string _name;
+
+    public override string Name => _name;
+
     [PublicAPI]
-    protected OptionsFile(string fileName) {
+    protected OptionsFile(string fileName, bool initDeclaredOptionMembers = true) : base(initDeclaredOptionMembers) {
+      _name = Path.GetFileNameWithoutExtension(fileName);
       _path = Path.Combine(Utilities.GetConfigsPath(), fileName);
       if (!File.Exists(_path)) {
         _toml = new DocumentSyntax();
@@ -57,6 +62,9 @@ namespace ModOptions {
       _toml = Toml.Parse(bytes, _path);
     }
 
+    public override bool IsEmpty => _toml.ChildrenCount == 0;
+
+    [PublicAPI]
     public void Import(string path) {
       if (!File.Exists(path))
         throw new FileNotFoundException("Can't import missing file.", path);

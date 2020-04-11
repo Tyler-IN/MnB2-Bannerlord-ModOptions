@@ -85,7 +85,7 @@ namespace ModOptions {
 
     public override string ToString()
       => $"{Namespace}:{Name} = {Value}";
-    
+
     public override int GetHashCode() {
       unchecked {
         var hashCode = Store.GetHashCode();
@@ -127,7 +127,7 @@ namespace ModOptions {
       => Value = value;
 
     public static bool operator ==(Option<TOption, TEnum> option, TEnum value)
-      => option?.Value.Equals(value) ?? value.Equals(null);
+      => option?.Value.Equals(value) ?? value == null;
 
     public static bool operator !=(Option<TOption, TEnum> option, TEnum value)
       => !(option == value);

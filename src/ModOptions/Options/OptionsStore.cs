@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 
@@ -15,6 +14,30 @@ namespace ModOptions {
     private static readonly ICollection<OptionsStore> RegisteredForGuiSequence
       = new LinkedList<OptionsStore>();
 
+    protected OptionsStore(bool initDeclaredOptionMembers) {
+      if (!initDeclaredOptionMembers)
+        return;
+
+      foreach (var mi in GetOptionMembers()) {
+        switch (mi) {
+          // @formatter:off
+          case FieldInfo fi: fi.SetValue(this, CreateMemberOption(fi.FieldType, mi)); break;
+          case PropertyInfo pi: pi.SetValue(this, CreateMemberOption(pi.PropertyType, mi)); break;
+          // @formatter:on
+        }
+      }
+    }
+
+    private Option CreateMemberOption(Type t, MemberInfo mi) {
+      var ctor = GetOptionConstructor(t);
+      return ctor != null
+        ? (Option) ctor.Invoke(null, new object[] {this, null, mi.Name})
+        : null;
+    }
+
+    private static ConstructorInfo GetOptionConstructor(Type t)
+      => t.GetConstructor(new[] {typeof(OptionsStore), typeof(string), typeof(string)});
+
     public static bool RegisterForGui(OptionsStore options) {
       if (!RegisteredForGui.Add(options))
         return false;
@@ -28,7 +51,10 @@ namespace ModOptions {
         yield return options;
     }
 
-    public abstract string Name { get; }
+    public virtual string Name
+      => throw new NotImplementedException("The Name member of your options store implementation is missing.");
+
+    public abstract bool IsEmpty { get; }
 
     [PublicAPI]
     public object GetMetadata(Option option, string metadataType)
@@ -39,17 +65,28 @@ namespace ModOptions {
 
     [PublicAPI]
     public virtual IEnumerable<Option> GetKnownOptions() {
+      foreach (var mi in GetOptionMembers()) {
+        switch (mi) {
+          // @formatter:off
+          case FieldInfo fi: yield return (Option) fi.GetValue(this); break;
+          case PropertyInfo pi: yield return (Option) pi.GetValue(this); break;
+          // @formatter:on
+        }
+      }
+    }
+
+    private IEnumerable<MemberInfo> GetOptionMembers() {
       foreach (var mi in GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance)) {
         switch (mi) {
           case FieldInfo fi: {
             if (typeof(Option).IsAssignableFrom(fi.FieldType))
-              yield return (Option) fi.GetValue(this);
+              yield return fi;
 
             break;
           }
           case PropertyInfo pi: {
             if (typeof(Option).IsAssignableFrom(pi.PropertyType))
-              yield return (Option) pi.GetValue(this);
+              yield return pi;
 
             break;
           }
