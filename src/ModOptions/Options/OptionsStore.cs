@@ -30,42 +30,67 @@ namespace ModOptions {
 
     public abstract string Name { get; }
 
+    [PublicAPI]
     public object GetMetadata(Option option, string metadataType)
       => GetOptionMetadata(option.Namespace, option.Name, metadataType);
 
+    [PublicAPI]
     public virtual object GetOptionMetadata(string ns, string key, string metadataType) => null;
 
+    [PublicAPI]
     public virtual IEnumerable<Option> GetKnownOptions() {
       foreach (var mi in GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance)) {
-        if (mi is FieldInfo fi) {
-          if (typeof(Option).IsAssignableFrom(fi.FieldType))
-            yield return (Option) fi.GetValue(this);
-        }
-        else if (mi is PropertyInfo pi) {
-          if (typeof(Option).IsAssignableFrom(pi.PropertyType))
-            yield return (Option) pi.GetValue(this);
+        switch (mi) {
+          case FieldInfo fi: {
+            if (typeof(Option).IsAssignableFrom(fi.FieldType))
+              yield return (Option) fi.GetValue(this);
+
+            break;
+          }
+          case PropertyInfo pi: {
+            if (typeof(Option).IsAssignableFrom(pi.PropertyType))
+              yield return (Option) pi.GetValue(this);
+
+            break;
+          }
         }
       }
     }
 
+    [PublicAPI]
     public abstract void Save();
 
+    [PublicAPI]
     public abstract void Set<T>(string key, T value);
 
+    [PublicAPI]
     public abstract void Set<T>(string ns, string key, T value);
 
+    [PublicAPI]
     public abstract T Get<T>(string key);
 
+    [PublicAPI]
     public abstract T Get<T>(string ns, string key);
 
+    [PublicAPI]
     public OptionNamespace GetNamespace(string ns)
       => new OptionNamespace(this, ns);
 
+    [PublicAPI]
     public Option<TOption> GetOption<TOption>([NotNull] string key) where TOption : unmanaged, IEquatable<TOption>
       => GetOption<TOption>(null, key);
 
+    [PublicAPI]
     public Option<TOption> GetOption<TOption>([CanBeNull] string ns, [NotNull] string key) where TOption : unmanaged, IEquatable<TOption>
       => new Option<TOption>(this, ns, key);
+
+    [PublicAPI]
+    public StringOption GetStringOption([NotNull] string key)
+      => GetStringOption(null, key);
+
+    [PublicAPI]
+    public StringOption GetStringOption([CanBeNull] string ns, [NotNull] string key)
+      => new StringOption(this, ns, key);
 
     public abstract bool Equals(OptionsStore other);
 

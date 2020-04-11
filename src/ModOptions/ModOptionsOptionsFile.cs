@@ -6,7 +6,7 @@ namespace ModOptions {
 
     public override string Name => nameof(ModOptions);
 
-    public ModOptionsOptionsFile() : base(nameof(ModOptions)) {
+    public ModOptionsOptionsFile() : base(nameof(ModOptions) + ".txt") {
     }
 
   }
