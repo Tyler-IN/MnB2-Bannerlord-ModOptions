@@ -5,5 +5,9 @@
   </tags>
   <strings>
     <string id="ModOptions" text="模块选项" />
+    <string id="CommunityPatch" text="社区补丁" />
+    <string id="DisableIntroVideo" text="禁用介绍性视频" />
+    <string id="RecordFirstChanceExceptions" text="记录首先出现的异常" />
+    <string id="CopyDiagnosticsToClipboard" text="复制诊断消息到剪贴板" />
   </strings>
 </base>
